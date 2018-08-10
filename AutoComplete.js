@@ -4,33 +4,38 @@
             props: {
                 url: { type: String, required: true },
 
-                id: { type: String, required: true },
+                inputId: { type: String, required: true },
+                inputValueId: { type: String, required: false },
+                inputValueDisabled: { type: Boolean, required: false, default: false },
 
-                parentevent: { type: Function, required: false },
+                itemsId: { type: String, required: true },
+                itemsValue: { type: String, required: true },
 
-                placeholdervalue: { type: String, required: true },
+                placeHolderValue: { type: String, required: true },
+                className: { type: String, required: true },
 
-                classname: { type: String, required: true },
+                currentKey: { required: true },
+                currentValue: { type: String, required: true },
 
-                pid: { type: String, required: true },
-                pvalue: { type: String, required: true },
-
-                value: { type: String, required: true }
+                searchParmName: { type: String, required: true },
             },
             data: function () {
                 return {
-                    islemId: "",
+                    item: {},
+                    id: "",
+                    value: "",
                     items: [],
-                    selectedItem: {},
-
                     display: "none",
-
                     focusItem: 0,
-                    searchTerm: ""
                 }
             },
-            created: function () {
-                this.searchTerm = this.value;
+            watch: {
+                currentValue: function (val) {
+                    this.value = val;
+                },
+                currentKey: function (val) {
+                    this.id = val;
+                }
             },
             methods: {
                 handleKeyDown(e) {
@@ -77,44 +82,43 @@
 
                 },
                 activeClass(i) {
-                    const focusClass = i === this.focusItem ? 'active' : "";
+                    const focusClass = i === this.focusItem ? 'dropdown-item active' : "dropdown-item";
                     return `${focusClass}`;
                 },
                 hoverItem(index) {
                     this.focusItem = index;
                 },
                 selectItem: function (index) {
-                    this.selectedItem = this.items[index];
+                    this.item = this.items[index];
 
-                    this.searchTerm = this.selectedItem[this.pvalue];
+                    this.id = this.item[this.itemsId];
+                    this.value = this.item[this.itemsValue];
 
                     this.items = [];
                     this.focusItem = -1;
                     this.display = "none";
-
-                    this.$emit('parentevent', this.selectedItem);
+                    this.$emit('parentevent', this.item);
 
                 },
                 searchValue: function () {
                     this.display = "none";
                     this.items = [];
-                    this.selectedItem = {};
 
-                    if (this.searchTerm.length == 0) {
-                        var emptyTtem = {};
-
-                        emptyTtem[this.pid] = "";
-                        emptyTtem[this.pvalue] = "";
-
-                        this.$emit('parentevent', emptyTtem);
+                    if (this.value.length == 0) {
+                        this.item[this.itemsId] = "";
+                        this.item[this.itemsValue] = "";
+                        this.id = "";
+                        this.$emit('parentevent', this.item);
+                        return;
                     }
-                        
 
-                    if (this.searchTerm.length < 3) return;
+                    if (this.value.length < 3) return;
 
                     const that = this;
+                    var params = {};
+                    params[this.searchParmName] = this.value;
 
-                    window.axios.get(this.url, { params: { value: this.searchTerm } })
+                    window.axios.get(this.url, { params })
                         .then(function (response) {
 
                             if (response.data.length == 0) {
