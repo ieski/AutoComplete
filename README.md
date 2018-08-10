@@ -3,7 +3,21 @@
 Vue.js 2 AutoComplete component
 
 ```html
-<autocomplete url="\getList" v-on:parentevent="selectvalue($event)" id="id" value="adi" />
+<autocomplete 
+              input-id="hiddenInputId"
+              ref="frmCompanyInput"
+              :current-key="company.companyType != null ? company.companyType.id : ''"
+              :current-value="company.companyType != null ? company.companyType.adi : ''"
+              :input-value-disabled="this.formDisabled"
+              search-parm-name="name"
+              items-id="id"
+              items-value="value"
+              url="\getList"
+              class-name="form-control"
+              place-holder-value="Company Type" 
+              v-on:parentevent="selectItem($event)"
+              />
+
 ```  
 ```javascript
  <script type="text/javascript">
@@ -13,8 +27,16 @@ Vue.js 2 AutoComplete component
             data: {
                 selectItem: {}
             },
+            computed: {
+              getId: function () {              
+                alert(this.$ref.frmCompanyInput.id);
+              },
+              getValue: function () {
+                alert(this.$ref.frmCompanyInput.value);
+              }
+            },
             methods: {
-                selectvalue(item) {
+                selectItem(item) {
                     this.selectItem = item;
                 }
             }
